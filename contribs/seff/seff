@@ -8,12 +8,14 @@ use strict qw/vars/;
 use Getopt::Std;
 use POSIX qw/pow/;
 use Sys::Hostname;
-use lib "${FindBin::Bin}/../lib/perl";
+# Uncomment this line and amend appropriately for your installation, if the
+# Slurmdb and Slurm Perl modules are not in your @INC paths.
+#use lib "${FindBin::Bin}/../lib/perl";
 use Slurmdb ':all';
 use Slurm ':all';
 #use Data::Dumper;
 
-my $VERSION = "2.1";
+my $VERSION = "2.2";
 
 # This script is roughtly equivalent to:
 # sacct -P -n -a --format JobID,User,Group,State,Cluster,AllocCPUS,REQMEM,TotalCPU,Elapsed,MaxRSS,ExitCode,NNodes,NTasks -j <job_id>
@@ -64,7 +66,8 @@ my $job = @$jobs[0];
 
 my $jobid = $job->{'jobid'};
 my $user = $job->{'user'};
-my $group = getgrgid($job->{'gid'});
+my $group = getgrgid($job->{'gid'}) || "<GID $job->{'gid'}>";
+  # In LDAP environments the GID might not refer to a known group.
 my $state = $slurm->job_state_string($job->{'state'});
 $clustername = $job->{'cluster'};
 
